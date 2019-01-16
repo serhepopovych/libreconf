@@ -24,8 +24,6 @@ declare -a crt1_request_tools_list=(
 # Global options/vars                                                          #
 ################################################################################
 
-set -o pipefail
-
 ##
 ## Helpers
 ##
