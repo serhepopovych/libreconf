@@ -1,0 +1,13 @@
+libreconf - bash helper library for netctl project reconfigure tools
+====================================================================
+
+This simple library is used by every reconfigure tools and provide interface
+name templates (in library .cfg file), loads reconf.conf file that contains
+WO_IF, LO_IF and IFB_IF variables with interface names for world, local and
+ifb network devices.
+
+It depends on libnctl and thus provided API is deprecated and should not be
+used in new projects too.
+
+Support is still provided as this library is a base for other netctl projects
+Library could be a good example of approaches and techniques in bash scripting.
