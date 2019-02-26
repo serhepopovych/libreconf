@@ -1,0 +1,54 @@
+#!/bin/sh -e
+
+# Requires: useradd(8), userdel(8), usermod(8)
+
+if [ "$EUID" = 0 ]; then
+	# User group name must match user name
+	# NOTE: It is not expected and could be insecure that users other
+	#       than $RECONFIGURE_USER are members of $RECONFIGURE_GROUP
+	if [ "$(id -gn "$RECONFIGURE_USER" 2>/dev/null)" != "$RECONFIGURE_GROUP" ]; then
+		userdel "$RECONFIGURE_USER" >/dev/null 2>&1 ||:
+		groupadd -f "$RECONFIGURE_GROUP" >/dev/null 2>&1 ||:
+		useradd -M \
+			-g "$RECONFIGURE_GROUP" \
+			-c "$RECONFIGURE_COMMENT" \
+			-d "$RECONFIGURE_HOME" \
+			-s "$RECONFIGURE_SHELL" \
+			"$RECONFIGURE_USER"
+	else
+		# $RECONFIGURE_USER with $RECONFIGURE_GROUP exists: make sure it's
+		# configuration is valid.
+		usermod \
+			-c "$RECONFIGURE_COMMENT" \
+			-d "$RECONFIGURE_HOME" \
+			-s "$RECONFIGURE_SHELL" \
+			"$RECONFIGURE_USER"
+	fi
+fi
+
+## Adjust filesystem ownership and permissions
+
+[ "$EUID" != 0 ] && owner='' || owner='root:root'
+
+# $ROOT/etc/sudoers.d/10-netctl-libreconf
+adj_rights "$owner" 0440 "$ROOT/etc/sudoers.d/10-netctl-libreconf"
+
+[ "$EUID" != 0 ] || owner="root:$RECONFIGURE_GROUP"
+
+# tmp, var/log
+adj_rights "$owner" '' \
+	"$DEST/netctl/tmp" \
+	"$DEST/netctl/var/log"
+
+# $RECONFIGURE_HOME, $RECONFIGURE_HOME/.ssh
+adj_rights "$owner" 2750 \
+	"$RECONFIGURE_HOME" \
+	"$RECONFIGURE_HOME/.ssh"
+
+## Remove unnecessary backups
+
+# $ROOT/etc/logrotate.d/netctl from netctl-base subproject
+nctl_inst_sh="$ROOT/etc/logrotate.d/netctl.nctl-inst-sh"
+[ ! -f "$nctl_inst_sh" ] || rm -f "$nctl_inst_sh"
+
+return 0
