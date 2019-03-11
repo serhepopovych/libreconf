@@ -17,10 +17,23 @@ export RECONFIGURE_COMMENT="${RECONFIGURE_COMMENT:-Netctl reconfigure services}"
 # shell
 export RECONFIGURE_SHELL="${RECONFIGURE_SHELL:-/usr/bin/nologin}"
 
-SUBST_TEMPLATES="$SUBST_TEMPLATES
--e 's|@reconfigure_user@|$RECONFIGURE_USER|g'
--e 's|@reconfigure_group@|$RECONFIGURE_GROUP|g'
--e 's|@reconfigure_home@|$RECONFIGURE_HOME|g'
--e 's|@reconfigure_comment@|$RECONFIGURE_COMMENT|g'
--e 's|@reconfigure_shell@|$RECONFIGURE_SHELL|g'
-"
+SUBST_TEMPLATES="$SUBST_TEMPLATES"'
+-e "s|@reconfigure_user@|$RECONFIGURE_USER|g"
+-e "s|@reconfigure_group@|$RECONFIGURE_GROUP|g"
+-e "s|@reconfigure_home@|$RECONFIGURE_HOME|g"
+-e "s|@reconfigure_comment@|$RECONFIGURE_COMMENT|g"
+-e "s|@reconfigure_shell@|$RECONFIGURE_SHELL|g"
+'
+
+# Usage: subst_templates_reconf <file>
+subst_templates_reconf()
+{
+	# Remove extra slashes at the beginning (could be empty afterwards).
+	local RECONFIGURE_HOME="${RECONFIGURE_HOME##/}"
+	RECONFIGURE_HOME="${RECONFIGURE_HOME:+/$RECONFIGURE_HOME}"
+
+	subst_templates_base "$1"
+}
+
+# Register hook
+subst_templates_hook='subst_templates_reconf'
