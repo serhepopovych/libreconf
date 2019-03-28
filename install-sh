@@ -43,4 +43,10 @@ adj_rights "$owner" 2750 \
 	"$RECONFIGURE_HOME" \
 	"$RECONFIGURE_HOME/.ssh"
 
+# Remove backup of /etc/logorotate.d/netctl file from netctl-base as we provide
+# alternative version of this file with @reconfigure_group@ template.
+if [ -n "$BACKUP" ]; then
+	rm -f "$ROOT/etc/logrotate.d/netctl.$BACKUP"
+fi
+
 return 0
